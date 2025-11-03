@@ -57,6 +57,17 @@
         const trocoEsperado = [100, 50, 20, 10, 5, 2, 1];
         assert.deepEqual(trocoCalculado, trocoEsperado);
       });
+
+      test("ESTOQUE LIMITADO — 80 com {100:1, 50:0, 20:5, 10:10} → [20,20,20,20]", (assert) => {
+        const estoque = { 100: 1, 50: 0, 20: 5, 10: 10, 5: 0, 2: 0, 1: 0 };
+        // preço=20, pago=100 -> troco=80
+        const troco = calcularTroco(20, 100, estoque);
+        assert.deepEqual(
+          troco,
+          [20, 20, 20, 20],
+          "Deve montar 80 usando quatro notas de 20 com estoque limitado"
+        );
+      });
     </script>
   </body>
 </html>
