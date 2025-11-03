@@ -15,21 +15,88 @@
     <script src="https://code.jquery.com/qunit/qunit-1.18.0.js"></script>
 
     <script>
-      function calcularTroco(precoDoProduto, valorPago) {
-        const troco = valorPago - precoDoProduto;
-        const notasDisponiveis = [100, 50, 20, 10, 5, 2, 1];
-        const trocoEmNotas = [];
-        let valorRestante = troco;
+      // Versão antiga, ilimitada:
+      /*
+            function calcularTroco(precoDoProduto, valorPago) {
+              const troco = valorPago - precoDoProduto;
+              const notasDisponiveis = [100, 50, 20, 10, 5, 2, 1];
+              const trocoEmNotas = [];
+              let valorRestante = troco;
 
-        for (let i = 0; i < notasDisponiveis.length; i++) {
-          const nota = notasDisponiveis[i];
-          while (valorRestante >= nota) {
-            trocoEmNotas.push(nota);
-            valorRestante -= nota;
+              for (let i = 0; i < notasDisponiveis.length; i++) {
+                const nota = notasDisponiveis[i];
+                while (valorRestante >= nota) {
+                  trocoEmNotas.push(nota);
+                  valorRestante -= nota;
+                }
+              }
+
+              return trocoEmNotas;
+            }
+              */
+
+      const NOTAS = [100, 50, 20, 10, 5, 2, 1];
+
+      function calcularTroco(precoDoProduto, valorPago, estoque) {
+        const troco = valorPago - precoDoProduto;
+        if (troco < 0) throw new Error("Valor pago insuficiente.");
+
+        // Caso antigo (ilimitado): mantém o comportamento atual
+        if (estoque == null) {
+          const trocoEmNotas = [];
+          let resto = troco;
+          for (const nota of NOTAS) {
+            while (resto >= nota) {
+              trocoEmNotas.push(nota);
+              resto -= nota;
+            }
           }
+          return trocoEmNotas;
         }
 
-        return trocoEmNotas;
+        // Caso com estoque limitado (precisa de busca com backtracking)
+        // Cópia defensiva do estoque
+        const est = {};
+        for (const n of NOTAS) est[n] = estoque[n] || 0;
+
+        const resultado = [];
+
+        function dfs(idx, restante) {
+          if (restante === 0) return true;
+          if (idx >= NOTAS.length) return false;
+
+          const nota = NOTAS[idx];
+          const disponivel = est[nota] || 0;
+          const maxPossivel = Math.min(Math.floor(restante / nota), disponivel);
+
+          // Tenta do maior uso possível desta nota até zero
+          for (let k = maxPossivel; k >= 0; k--) {
+            if (k > 0) {
+              est[nota] -= k;
+              for (let i = 0; i < k; i++) resultado.push(nota);
+            }
+
+            if (dfs(idx + 1, restante - k * nota)) return true;
+
+            if (k > 0) {
+              est[nota] += k;
+              resultado.splice(resultado.length - k, k);
+            }
+          }
+          return false;
+        }
+
+        const ok = dfs(0, troco);
+        if (!ok) {
+          throw new Error("Não é possível dar o troco exato com o estoque disponível.");
+        }
+
+        // Se quiser que a função também *decremente o estoque original* ao final:
+        for (const nota of resultado) {
+          estoque[nota] = (estoque[nota] || 0) - 1;
+        }
+
+        return resultado;
       }
     </script>
 
