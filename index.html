@@ -16,14 +16,20 @@
 
     <script>
       function calcularTroco(precoDoProduto, valorPago) {
-        let troco = [];
+        const troco = valorPago - precoDoProduto;
+        const notasDisponiveis = [100, 50, 20, 10, 5, 2, 1];
+        const trocoEmNotas = [];
+        let valorRestante = troco;
 
-        if (valorPago - precoDoProduto != 0) {
-          // Precisa fornecer algum troco?
-          troco = [50, 20, 10, 5]; // Necessário para o teste que está falhando começar a passar
+        for (let i = 0; i < notasDisponiveis.length; i++) {
+          const nota = notasDisponiveis[i];
+          while (valorRestante >= nota) {
+            trocoEmNotas.push(nota);
+            valorRestante -= nota;
+          }
         }
 
-        return troco;
+        return trocoEmNotas;
       }
     </script>
 
@@ -37,6 +43,18 @@
       test("calcularTroco(215, 300) deve retornar [50, 20, 10, 5]", (assert) => {
         const trocoCalculado = calcularTroco(215, 300); // Esperado um array contendo [50, 20, 10, 5]
         const trocoEsperado = [50, 20, 10, 5];
+        assert.deepEqual(trocoCalculado, trocoEsperado);
+      });
+
+      test("calcularTroco(486, 600) deve retornar [100, 10, 2, 2]", (assert) => {
+        const trocoCalculado = calcularTroco(486, 600);
+        const trocoEsperado = [100, 10, 2, 2];
+        assert.deepEqual(trocoCalculado, trocoEsperado);
+      });
+
+      test("calcularTroco(12, 200) deve retornar [100, 50, 20, 10, 5, 2, 1]", (assert) => {
+        const trocoCalculado = calcularTroco(12, 200);
+        const trocoEsperado = [100, 50, 20, 10, 5, 2, 1];
         assert.deepEqual(trocoCalculado, trocoEsperado);
       });
     </script>
