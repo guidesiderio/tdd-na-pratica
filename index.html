@@ -135,6 +135,12 @@
           "Deve montar 80 usando quatro notas de 20 com estoque limitado"
         );
       });
+
+      test("ESTOQUE LIMITADO — lança erro quando não há combinação exata", (assert) => {
+        const estoque = { 5: 0, 2: 1, 1: 0, 10: 0, 20: 0, 50: 0, 100: 0 };
+        // Troco 3: com {2:1} e sem 1, é impossível
+        assert.throws(() => calcularTroco(0, 3, estoque), /não é possível/i);
+      });
     </script>
   </body>
 </html>
